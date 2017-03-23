@@ -89,12 +89,6 @@
         <string>remote-notification</string>
       </array>
     </config-file>
-    <config-file target="*-Info.plist" parent="GCM_SENDER_ID">
-      <string>$SENDER_ID</string>
-    </config-file>
-    <config-file target="*-Info.plist" parent="IS_GCM_ENABLED">
-      <true/>
-    </config-file>
     <config-file target="*-Debug.plist" parent="aps-environment">
       <string>development</string>
     </config-file>
@@ -108,8 +102,6 @@
     <framework src="AddressBook.framework"/>
     <framework src="libsqlite3.tbd"/>
     <framework src="libz.tbd"/>
-    <framework src="GoogleCloudMessaging" type="podspec" spec="~> 1.2.0"/>
-    <framework src="GGLInstanceID" type="podspec" spec="~> 1.2.1"/>
   </platform>
   <platform name="windows">
     <hook type="after_plugin_install" src="hooks/windows/setToastCapable.js"/>

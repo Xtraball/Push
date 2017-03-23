@@ -27,8 +27,6 @@
 #define GMP_NO_MODULES true
 
 #import "PushPlugin.h"
-#import "GoogleCloudMessaging.h"
-#import "GGLInstanceIDHeaders.h"
 
 @implementation PushPlugin : CDVPlugin
 
@@ -42,65 +40,6 @@
 @synthesize clearBadge;
 @synthesize handlerObj;
 
-@synthesize usesGCM;
-@synthesize gcmSandbox;
-@synthesize gcmSenderId;
-@synthesize gcmRegistrationOptions;
-@synthesize gcmRegistrationHandler;
-@synthesize gcmRegistrationToken;
-@synthesize gcmTopics;
-
--(void)initGCMRegistrationHandler;
-{
-    __weak __block PushPlugin *weakSelf = self;
-    gcmRegistrationHandler = ^(NSString *registrationToken, NSError *error){
-        if (registrationToken != nil) {
-            NSLog(@"GCM Registration Token: %@", registrationToken);
-            [weakSelf setGcmRegistrationToken: registrationToken];
-
-            id topics = [weakSelf gcmTopics];
-            if (topics != nil) {
-                for (NSString *topic in topics) {
-                    NSLog(@"subscribe from topic: %@", topic);
-                    id pubSub = [GCMPubSub sharedInstance];
-                    [pubSub subscribeWithToken: [weakSelf gcmRegistrationToken]
-                        topic:[NSString stringWithFormat:@"/topics/%@", topic]
-                        options:nil
-                        handler:^void(NSError *error) {
-                            if (error) {
-                                if (error.code == 3001) {
-                                    NSLog(@"Already subscribed to %@", topic);
-                                } else {
-                                    NSLog(@"Failed to subscribe to topic %@: %@", topic, error);
-                                }
-                            }
-                            else {
-                                NSLog(@"Successfully subscribe to topic %@", topic);
-                            }
-                    }];
-                }
-            }
-
-            [weakSelf registerWithToken:registrationToken];
-        } else {
-            NSLog(@"Registration to GCM failed with error: %@", error.localizedDescription);
-            [weakSelf failWithMessage:self.callbackId withMsg:@"" withError:error];
-        }
-    };
-}
-
-//  GCM refresh token
-//  Unclear how this is testable under normal circumstances
-- (void)onTokenRefresh {
-#if !TARGET_IPHONE_SIMULATOR
-    // A rotation of the registration tokens is happening, so the app needs to request a new token.
-    NSLog(@"The GCM registration token needs to be changed.");
-    [[GGLInstanceID sharedInstance] tokenWithAuthorizedEntity:[self gcmSenderId]
-                                                        scope:kGGLInstanceIDScopeGCM
-                                                      options:[self gcmRegistrationOptions]
-                                                      handler:[self gcmRegistrationHandler]];
-#endif
-}
 
 - (void)willSendDataMessageWithID:(NSString *)messageID error:(NSError *)error {
     NSLog(@"willSendDataMessageWithID");
@@ -116,93 +55,22 @@
     // Did successfully send message identified by messageID
 }
 
-- (void)didDeleteMessagesOnServer {
-    NSLog(@"didDeleteMessagesOnServer");
-    // Some messages sent to this device were deleted on the GCM server before reception, likely
-    // because the TTL expired. The client should notify the app server of this, so that the app
-    // server can resend those messages.
-}
-
 - (void)unregister:(CDVInvokedUrlCommand*)command;
 {
-    NSArray* topics = [command argumentAtIndex:0];
-
-    if (topics != nil) {
-        id pubSub = [GCMPubSub sharedInstance];
-        for (NSString *topic in topics) {
-            NSLog(@"unsubscribe from topic: %@", topic);
-            [pubSub unsubscribeWithToken: [self gcmRegistrationToken]
-                topic:[NSString stringWithFormat:@"/topics/%@", topic]
-                options:nil
-                handler:^void(NSError *error) {
-                    if (error) {
-                        NSLog(@"Failed to unsubscribe from topic %@: %@", topic, error);
-                    }
-                    else {
-                        NSLog(@"Successfully unsubscribe from topic %@", topic);
-                    }
-            }];
-        }
-    } else {
-        [[UIApplication sharedApplication] unregisterForRemoteNotifications];
-        [self successWithMessage:command.callbackId withMsg:@"unregistered"];
-    }
+    [[UIApplication sharedApplication] unregisterForRemoteNotifications];
+    [self successWithMessage:command.callbackId withMsg:@"unregistered"];
 }
 
 - (void)subscribe:(CDVInvokedUrlCommand*)command;
 {
-    NSString* topic = [command argumentAtIndex:0];
-
-    if (topic != nil) {
-        NSLog(@"subscribe from topic: %@", topic);
-        id pubSub = [GCMPubSub sharedInstance];
-        [pubSub subscribeWithToken: [self gcmRegistrationToken]
-            topic:[NSString stringWithFormat:@"/topics/%@", topic]
-            options:nil
-            handler:^void(NSError *error) {
-                if (error) {
-                    if (error.code == 3001) {
-                        NSLog(@"Already subscribed to %@", topic);
-                        [self successWithMessage:command.callbackId withMsg:[NSString stringWithFormat:@"Already subscribed to %@", topic]];
-                    } else {
-                        NSLog(@"Failed to subscribe to topic %@: %@", topic, error);
-                        [self failWithMessage:command.callbackId withMsg:[NSString stringWithFormat:@"Failed to subscribe to topic %@", topic] withError:error];
-                    }
-                }
-                else {
-                    NSLog(@"Successfully subscribe to topic %@", topic);
-                    [self successWithMessage:command.callbackId withMsg:[NSString stringWithFormat:@"Successfully subscribe to topic %@", topic]];
-                }
-        }];
-    } else {
-        NSLog(@"There is no topic to subscribe");
-        [self successWithMessage:command.callbackId withMsg:@"There is no topic to subscribe"];
-    }
+    NSLog(@"There is no topic to subscribe");
+    [self successWithMessage:command.callbackId withMsg:@"There is no topic to subscribe"];
 }
 
 - (void)unsubscribe:(CDVInvokedUrlCommand*)command;
 {
-    NSString* topic = [command argumentAtIndex:0];
-
-    if (topic != nil) {
-        NSLog(@"unsubscribe from topic: %@", topic);
-        id pubSub = [GCMPubSub sharedInstance];
-        [pubSub unsubscribeWithToken: [self gcmRegistrationToken]
-            topic:[NSString stringWithFormat:@"/topics/%@", topic]
-            options:nil
-            handler:^void(NSError *error) {
-                if (error) {
-                    NSLog(@"Failed to unsubscribe to topic %@: %@", topic, error);
-                    [self failWithMessage:command.callbackId withMsg:[NSString stringWithFormat:@"Failed to unsubscribe to topic %@", topic] withError:error];
-                } else {
-                    NSLog(@"Successfully unsubscribe to topic %@", topic);
-                    [self successWithMessage:command.callbackId withMsg:[NSString stringWithFormat:@"Successfully unsubscribe to topic %@", topic]];
-                }
-        }];
-    } else {
-        NSLog(@"There is no topic to unsubscribe");
-        [self successWithMessage:command.callbackId withMsg:@"There is no topic to unsubscribe"];
-    }
+    NSLog(@"There is no topic to unsubscribe");
+    [self successWithMessage:command.callbackId withMsg:@"There is no topic to unsubscribe"];
 }
 
 - (void)init:(CDVInvokedUrlCommand*)command;
@@ -215,8 +83,6 @@
         NSMutableDictionary* options = [command.arguments objectAtIndex:0];
         NSMutableDictionary* iosOptions = [options objectForKey:@"ios"];
 
-    NSArray* topics = [iosOptions objectForKey:@"topics"];
-    [self setGcmTopics:topics];
 
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 80000
         UIUserNotificationType UserNotificationTypes = UIUserNotificationTypeNone;
@@ -348,28 +214,6 @@
          (UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert)];
 #endif
 
-        //  GCM options
-        [self setGcmSenderId: [iosOptions objectForKey:@"senderID"]];
-        NSLog(@"GCM Sender ID %@", gcmSenderId);
-        if([[self gcmSenderId] length] > 0) {
-            NSLog(@"Using GCM Notification");
-            [self setUsesGCM: YES];
-            [self initGCMRegistrationHandler];
-        } else {
-            NSLog(@"Using APNS Notification");
-            [self setUsesGCM:NO];
-        }
-        id gcmSandBoxArg = [iosOptions objectForKey:@"gcmSandbox"];
-
-        [self setGcmSandbox:@NO];
-        if ([self usesGCM] &&
-            (([gcmSandBoxArg isKindOfClass:[NSString class]] && [gcmSandBoxArg isEqualToString:@"true"]) ||
-             [gcmSandBoxArg boolValue]))
-        {
-            NSLog(@"Using GCM Sandbox");
-            [self setGcmSandbox:@YES];
-        }
-
         if (notificationMessage) {			// if there is a pending startup notification
             dispatch_async(dispatch_get_main_queue(), ^{
                 // delay to allow JS event handlers to be setup
@@ -460,26 +304,7 @@
     [results setValue:dev.model forKey:@"deviceModel"];
     [results setValue:dev.systemVersion forKey:@"deviceSystemVersion"];
 
-    if([self usesGCM]) {
-        GGLInstanceIDConfig *instanceIDConfig = [GGLInstanceIDConfig defaultConfig];
-        instanceIDConfig.delegate = self;
-        [[GGLInstanceID sharedInstance] startWithConfig:instanceIDConfig];
-
-        [self setGcmRegistrationOptions: @{kGGLInstanceIDRegisterAPNSOption:deviceToken,
-                                           kGGLInstanceIDAPNSServerTypeSandboxOption:[self gcmSandbox]}];
-
-        [[GGLInstanceID sharedInstance] tokenWithAuthorizedEntity:[self gcmSenderId]
-                                                            scope:kGGLInstanceIDScopeGCM
-                                                          options:[self gcmRegistrationOptions]
-                                                          handler:[self gcmRegistrationHandler]];
-
-        GCMConfig *gcmConfig = [GCMConfig defaultConfig];
-        gcmConfig.receiverDelegate = self;
-        [[GCMService sharedInstance] startWithConfig:gcmConfig];
-
-    } else {
-        [self registerWithToken: token];
-    }
+    [self registerWithToken: token];
 #endif
 }
 
