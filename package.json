@@ -1,6 +1,6 @@
 {
-  "name": "siberian-plugin-push",
-  "description": "Register and receive push notifications.",
+  "name": "Push",
+  "description": "Cordova Push",
   "version": "1.10.0",
   "homepage": "https://github.com/Xtraball/siberian-plugin-push#readme",
   "repository": {
@@ -11,7 +11,7 @@
     "url": "https://github.com/Xtraball/siberian-plugin-push/issues"
   },
   "cordova": {
-    "id": "siberian-plugin-push",
+    "id": "Push",
     "platforms": [
       "ios",
       "android",
