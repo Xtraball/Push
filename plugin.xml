@@ -66,6 +66,8 @@
                      target-dir="app/src/main/java/com/adobe/phonegap/push/"/>
         <source-file src="src/android/com/adobe/phonegap/push/PushDismissedHandler.java"
                      target-dir="app/src/main/java/com/adobe/phonegap/push/"/>
+
+        <framework src="src/android/build.gradle" custom="true" type="gradleReference"/>
     </platform>
 
     <platform name="browser">
