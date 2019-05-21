@@ -14,9 +14,7 @@
     "id": "Push",
     "platforms": [
       "ios",
-      "android",
-      "windows",
-      "browser"
+      "android"
     ]
   },
   "keywords": [

@@ -51,7 +51,7 @@ var PushNotification = function(options) {
             that.emit('notification', event.data);
         };
 
-        navigator.serviceWorker.register('ServiceWorker.js').then(function() {
+        navigator.serviceWorker.register('service-worker.js').then(function() {
             return navigator.serviceWorker.ready;
         })
         .then(function(reg) {

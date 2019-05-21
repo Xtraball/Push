@@ -70,14 +70,14 @@
         <framework src="src/android/build.gradle" custom="true" type="gradleReference"/>
     </platform>
 
-    <platform name="browser">
+    <!--platform name="browser">
         <js-module src="www/browser/push.js" name="BrowserPush">
             <clobbers target="PushNotification"/>
         </js-module>
-        <asset src="src/browser/ServiceWorker.js" target="ServiceWorker.js"/>
-        <asset src="src/browser/manifest.json" target="manifest.json"/>
+        <asset src="src/browser/service-worker.js" target="./service-worker.js"/>
+        <asset src="src/browser/manifest.json" target="./manifest.json"/>
         <hook type="after_prepare" src="hooks/browser/updateManifest.js"/>
-    </platform>
+    </platform-->
 
     <platform name="ios">
         <config-file target="config.xml" parent="/*">
