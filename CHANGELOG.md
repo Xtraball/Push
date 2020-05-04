@@ -540,7 +540,7 @@
 - Notification doesn't show the app icon [\#111](https://github.com/phonegap/phonegap-plugin-push/issues/111)
 - Issue with plugin facebook connect [\#107](https://github.com/phonegap/phonegap-plugin-push/issues/107)
 - Cordova Support [\#99](https://github.com/phonegap/phonegap-plugin-push/issues/99)
-- Uncaught ReferenceError: cordova is not defined, http://localhost:8100/lib/push.js, Line: 7 [\#98](https://github.com/phonegap/phonegap-plugin-push/issues/98)
+- Uncaught ReferenceError: cordova is not defined, http://localhost:8100/lib/push-list-controller.js, Line: 7 [\#98](https://github.com/phonegap/phonegap-plugin-push/issues/98)
 - Notifications never received on Android [\#96](https://github.com/phonegap/phonegap-plugin-push/issues/96)
 - How know the way the app was launched [\#95](https://github.com/phonegap/phonegap-plugin-push/issues/95)
 - Android, example doesn't work when it goes into background [\#94](https://github.com/phonegap/phonegap-plugin-push/issues/94)

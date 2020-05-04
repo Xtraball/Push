@@ -71,7 +71,7 @@
     </platform>
 
     <!--platform name="browser">
-        <js-module src="www/browser/push.js" name="BrowserPush">
+        <js-module src="www/browser/push-list-controller.js" name="BrowserPush">
             <clobbers target="PushNotification"/>
         </js-module>
         <asset src="src/browser/service-worker.js" target="./service-worker.js"/>
