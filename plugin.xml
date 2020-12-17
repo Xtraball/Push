@@ -98,7 +98,8 @@
         <source-file src="src/ios/PushPlugin.m"/>
         <header-file src="src/ios/AppDelegate+notification.h"/>
         <header-file src="src/ios/PushPlugin.h"/>
-        <framework src="FirebaseMessaging" type="podspec" spec="~> 2.0.0"/>
+        <framework src="nanopb" type="podspec" spec="~> 2.30906.0"/>
+        <framework src="FirebaseMessaging" type="podspec" spec="~> 7.3.0"/>
         <framework src="PushKit.framework"/>
     </platform>
 </plugin>
